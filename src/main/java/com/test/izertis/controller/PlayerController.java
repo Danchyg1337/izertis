@@ -25,24 +25,24 @@ public class PlayerController {
     @Operation(summary = "Register player")
     @PostMapping
     public ResponseEntity<PlayerResponseDTO> registerPlayer(@Valid @RequestBody PlayerRequestDTO playerRequestDTO,
-                                                             @PathVariable long clubId) {
+                                                            @PathVariable long clubId) {
         return ResponseEntity.ok(playerService.registerPlayer(playerRequestDTO, clubId));
     }
 
     @Operation(summary = "Get all players of the club")
     @GetMapping
     public ResponseEntity<Page<PlayerResponseDTO>> listPlayers(@PathVariable long clubId,
-                                                                @RequestParam(value = "givenName", required = false) String givenName,
-                                                                @RequestParam(value = "familyName", required = false) String familyName,
-                                                                //@RequestParam(value = "nationality", required = false) String federation,
-                                                                @Parameter(hidden = true) @PageableDefault(size = 5, sort = "id", direction = Direction.ASC) Pageable pageable) {
+                                                               @RequestParam(value = "givenName", required = false) String givenName,
+                                                               @RequestParam(value = "familyName", required = false) String familyName,
+                                                               //@RequestParam(value = "nationality", required = false) String federation,
+                                                               @Parameter(hidden = true) @PageableDefault(size = 5, sort = "id", direction = Direction.ASC) Pageable pageable) {
         return ResponseEntity.ok(playerService.getAllPlayers(clubId, givenName, familyName, pageable));
     }
 
     @Operation(summary = "Get player details")
     @GetMapping("/{playerId}")
     public ResponseEntity<PlayerResponseDTO> listPlayers(@PathVariable long clubId,
-                                                          @PathVariable long playerId) {
+                                                         @PathVariable long playerId) {
         return ResponseEntity.ok(playerService.getPlayerDetails(clubId, playerId));
     }
 
@@ -57,7 +57,7 @@ public class PlayerController {
     @Operation(summary = "Delete player")
     @DeleteMapping("/{playerId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deletePlayer(@PathVariable Long clubId, @PathVariable Long playerId) {
+    public void deletePlayer(@PathVariable long clubId, @PathVariable long playerId) {
         playerService.deletePlayer(clubId, playerId);
     }
 }

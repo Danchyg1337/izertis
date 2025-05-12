@@ -4,18 +4,17 @@ import com.test.izertis.dto.request.ClubRequestDTO;
 import com.test.izertis.dto.response.ClubResponseDTO;
 import com.test.izertis.entity.Club;
 import com.test.izertis.exception.ConflictException;
-import com.test.izertis.exception.InsufficientAuthoritiesException;
 import com.test.izertis.exception.ResourceNotFoundException;
 import com.test.izertis.mapper.ClubMapper;
 import com.test.izertis.repository.ClubRepository;
 import com.test.izertis.repository.PlayerRepository;
 import com.test.izertis.service.auth.AuthService;
+import com.test.izertis.service.validator.ClubValidator;
 import com.test.izertis.specification.ClubSpecifications;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +25,7 @@ public class ClubService {
     private final PlayerRepository playerRepository;
     private final ClubRepository clubRepository;
     private final ClubMapper clubMapper;
+    private final ClubValidator clubValidator;
     private final AuthService authService;
     private final PasswordEncoder passwordEncoder;
 
@@ -36,7 +36,6 @@ public class ClubService {
         if (clubRepository.findByUsername(newClubUsername).isPresent()) {
             throw new ConflictException("{errors.ServiceClubService.clubAlreadyExists}" + newClubUsername);
         }
-
 
         Club clubEntity = new Club();
         clubMapper.fromDto(clubRequestDTO, clubEntity);
@@ -50,14 +49,10 @@ public class ClubService {
 
     @Transactional(readOnly = true)
     public ClubResponseDTO getClubDetails(long id) {
-        Long currentClubId = authService.getCurrentClubId();
-
         Club requestedClub = clubRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("{errors.ServiceClubService.clubNotFound}"));
 
-        if (!requestedClub.getIsPublic() && !currentClubId.equals(requestedClub.getId())) {
-            throw new InsufficientAuthoritiesException(HttpStatus.BAD_REQUEST, "{errors.ServiceClubService.notAllowedToGetClubDetails}");
-        }
+        clubValidator.validateThatUserHasReadAccessToClub(requestedClub);
 
         ClubResponseDTO clubResponseDTO = clubMapper.toDto(requestedClub);
 
