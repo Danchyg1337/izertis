@@ -1,17 +1,17 @@
 package com.test.izertis.exception;
 
-import org.springframework.http.HttpStatusCode;
+import org.springframework.http.HttpStatus;
 
 public class InsufficientAuthoritiesException extends RuntimeException {
 
-    private final HttpStatusCode statusCode;
+    private final HttpStatus status;
 
-    public InsufficientAuthoritiesException(HttpStatusCode status, String message) {
+    public InsufficientAuthoritiesException(HttpStatus status, String message) {
         super(message);
-        this.statusCode = status;
+        this.status = status;
     }
 
-    public HttpStatusCode getStatusCode() {
-        return statusCode;
+    public HttpStatus getStatusCode() {
+        return status;
     }
 }

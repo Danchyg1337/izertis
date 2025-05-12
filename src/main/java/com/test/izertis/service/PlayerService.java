@@ -1,97 +1,96 @@
 package com.test.izertis.service;
 
-import com.test.izertis.dtos.request.NewPlayerDTO;
-import com.test.izertis.dtos.response.PlayerDTO;
-import com.test.izertis.dtos.response.PlayerDetailsDTO;
+import com.test.izertis.dto.request.PlayerRequestDTO;
+import com.test.izertis.dto.response.PlayerResponseDTO;
+import com.test.izertis.entity.Club;
+import com.test.izertis.entity.Player;
 import com.test.izertis.exception.InsufficientAuthoritiesException;
-import com.test.izertis.exception.NotFoundException;
-import com.test.izertis.mappers.PlayerMapper;
-import com.test.izertis.model.Club;
-import com.test.izertis.model.Player;
+import com.test.izertis.exception.ResourceNotFoundException;
+import com.test.izertis.mapper.PlayerMapper;
 import com.test.izertis.repository.ClubRepository;
 import com.test.izertis.repository.PlayerRepository;
 import com.test.izertis.service.auth.AuthService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @RequiredArgsConstructor
 @Service
-@Transactional
 public class PlayerService {
 
     private final AuthService authService;
     private final PlayerMapper playerMapper;
     private final PlayerRepository playerRepository;
     private final ClubRepository clubRepository;
-    public PlayerDTO registerPlayer(NewPlayerDTO newPlayerDTO, long clubId) {
+
+    @Transactional
+    public PlayerResponseDTO registerPlayer(PlayerRequestDTO playerRequestDTO, long clubId) {
         Long currentClubId = authService.getCurrentClubId();
 
         if (!currentClubId.equals(clubId)) {
-            throw new InsufficientAuthoritiesException(HttpStatus.BAD_REQUEST, "You are not allowed to register player for this club");
+            throw new InsufficientAuthoritiesException(HttpStatus.BAD_REQUEST, "{errors.ServicePlayerService.notAllowedToRegisterPlayer}");
         }
 
         Club currentClub = clubRepository.findById(currentClubId)
-                .orElseThrow( () -> new NotFoundException("Club not found for provided token"));
+                .orElseThrow(() -> new ResourceNotFoundException("{errors.ServiceClubService.clubAlreadyExists}"));
 
-        Player newPlayer = playerMapper.toEntity(newPlayerDTO);
+        Player newPlayer = new Player();
+        playerMapper.fromDto(playerRequestDTO, newPlayer);
+
         newPlayer.setClub(currentClub);
+
         Player savedPlayer = playerRepository.save(newPlayer);
 
-        return playerMapper.toPlayerDTO(savedPlayer);
+        return playerMapper.toDtoWithoutDetails(savedPlayer);
     }
 
     @Transactional(readOnly = true)
-    public Page<PlayerDTO> getAllPlayers(long clubId,
-                                         Pageable pageable) {
+    public Page<PlayerResponseDTO> getAllPlayers(long clubId,
+                                                 Pageable pageable) {
         Long currentClubId = authService.getCurrentClubId();
 
         Club requestedClub = clubRepository.findById(clubId)
-                .orElseThrow( () -> new NotFoundException("Requested club not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("{errors.ServiceClubService.clubNotFound}"));
 
         if (!requestedClub.getIsPublic() && !currentClubId.equals(requestedClub.getId())) {
-            throw new InsufficientAuthoritiesException(HttpStatus.BAD_REQUEST, "You are not allowed to get players of this club");
+            throw new InsufficientAuthoritiesException(HttpStatus.BAD_REQUEST, "{errors.ServicePlayerService.notAllowedToGetPlayers}");
         }
 
         Page<Player> players = playerRepository.findByClubId(clubId, pageable);
 
-        return players.map(playerMapper::toPlayerDTO);
+        return players.map(playerMapper::toDtoWithoutDetails);
     }
 
     @Transactional(readOnly = true)
-    public PlayerDetailsDTO getPlayerDetails(long clubId, long playerId) {
+    public PlayerResponseDTO getPlayerDetails(long clubId, long playerId) {
         Long currentClubId = authService.getCurrentClubId();
 
         Club requestedClub = clubRepository.findById(clubId)
-                .orElseThrow( () -> new NotFoundException("Requested club not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("{errors.ServiceClubService.clubNotFound}"));
 
         if (!requestedClub.getIsPublic() && !currentClubId.equals(requestedClub.getId())) {
-            throw new InsufficientAuthoritiesException(HttpStatus.BAD_REQUEST, "You are not allowed to get details of this player");
+            throw new InsufficientAuthoritiesException(HttpStatus.BAD_REQUEST, "{errors.ServicePlayerService.notAllowedToGetPlayerDetails}");
         }
 
         Player requestedPlayer = playerRepository.findById(playerId)
-                .orElseThrow( () -> new NotFoundException("Requested player not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("{errors.ServicePlayerService.playerNotFound}"));
 
-        return playerMapper.toPlayerDetailsDTO(requestedPlayer);
+        return playerMapper.toDto(requestedPlayer);
     }
 
-    public PlayerDTO updatePlayer(NewPlayerDTO playerDTO, long clubId, long playerId) {
+    @Transactional
+    public PlayerResponseDTO updatePlayer(PlayerRequestDTO playerDTO, long clubId, long playerId) {
         Long currentClubId = authService.getCurrentClubId();
 
         if (!currentClubId.equals(clubId)) {
-            throw new InsufficientAuthoritiesException(HttpStatus.BAD_REQUEST, "You are not allowed to update player for this club");
+            throw new InsufficientAuthoritiesException(HttpStatus.BAD_REQUEST, "{errors.ServicePlayerService.notAllowedToUpdatePlayer}");
         }
 
         Player requestedPlayer = playerRepository.findById(playerId)
-                .orElseThrow( () -> new NotFoundException("Requested player not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("{errors.ServicePlayerService.playerNotFound}"));
 
         requestedPlayer.setGivenName(playerDTO.getGivenName());
         requestedPlayer.setFamilyName(playerDTO.getFamilyName());
@@ -101,14 +100,15 @@ public class PlayerService {
 
         Player savedPlayer = playerRepository.save(requestedPlayer);
 
-        return playerMapper.toPlayerDTO(savedPlayer);
+        return playerMapper.toDtoWithoutDetails(savedPlayer);
     }
 
+    @Transactional
     public void deletePlayer(Long clubId, Long playerId) {
         Long currentClubId = authService.getCurrentClubId();
 
         if (!currentClubId.equals(clubId)) {
-            throw new InsufficientAuthoritiesException(HttpStatus.BAD_REQUEST, "You are not allowed to delete player for this club");
+            throw new InsufficientAuthoritiesException(HttpStatus.BAD_REQUEST, "{errors.ServicePlayerService.notAllowedToDeletePlayer}");
         }
 
         playerRepository.deleteById(playerId);

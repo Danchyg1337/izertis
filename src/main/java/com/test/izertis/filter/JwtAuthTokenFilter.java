@@ -1,9 +1,8 @@
-package com.test.izertis.filters;
+package com.test.izertis.filter;
 
 import com.test.izertis.config.JwtProvider;
-import com.test.izertis.model.Club;
+import com.test.izertis.entity.Club;
 import com.test.izertis.repository.ClubRepository;
-import com.test.izertis.service.security.CustomUserDetailsService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,7 +21,6 @@ import java.util.List;
 public class JwtAuthTokenFilter extends OncePerRequestFilter {
 
     private final JwtProvider jwtProvider;
-    private final CustomUserDetailsService customUserDetailsService;
     private final ClubRepository clubRepository;
 
     @Override

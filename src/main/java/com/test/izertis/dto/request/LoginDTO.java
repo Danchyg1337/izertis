@@ -1,4 +1,4 @@
-package com.test.izertis.dtos.request;
+package com.test.izertis.dto.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

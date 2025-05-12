@@ -1,9 +1,12 @@
-package com.test.izertis.dtos.response;
+package com.test.izertis.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import lombok.Data;
 
 @Data
-public class ClubDetailsDTO {
+@JsonInclude(Include.NON_NULL)
+public class ClubResponseDTO {
     private Long id;
 
     private String officialName;

@@ -1,13 +1,12 @@
 package com.test.izertis.service;
 
-import com.test.izertis.dtos.request.NewClubDTO;
-import com.test.izertis.dtos.response.ClubDTO;
-import com.test.izertis.dtos.response.ClubDetailsDTO;
+import com.test.izertis.dto.request.ClubRequestDTO;
+import com.test.izertis.dto.response.ClubResponseDTO;
+import com.test.izertis.entity.Club;
+import com.test.izertis.exception.ConflictException;
 import com.test.izertis.exception.InsufficientAuthoritiesException;
-import com.test.izertis.exception.NotFoundException;
-import com.test.izertis.mappers.ClubMapper;
-import com.test.izertis.model.Club;
-import com.test.izertis.model.Player;
+import com.test.izertis.exception.ResourceNotFoundException;
+import com.test.izertis.mapper.ClubMapper;
 import com.test.izertis.repository.ClubRepository;
 import com.test.izertis.repository.PlayerRepository;
 import com.test.izertis.service.auth.AuthService;
@@ -18,14 +17,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
-
-import java.util.List;
-import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
-@Transactional
 public class ClubService {
     private final PlayerRepository playerRepository;
     private final ClubRepository clubRepository;
@@ -33,64 +27,61 @@ public class ClubService {
     private final AuthService authService;
     private final PasswordEncoder passwordEncoder;
 
-    public ClubDTO registerClub(NewClubDTO newClubDTO) {
-        String newClubUsername = newClubDTO.getUsername();
+    @Transactional
+    public ClubResponseDTO registerClub(ClubRequestDTO clubRequestDTO) {
+        String newClubUsername = clubRequestDTO.getUsername();
 
         if (clubRepository.findByUsername(newClubUsername).isPresent()) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Username " + newClubUsername + " already exists");
+            throw new ConflictException("{errors.ServiceClubService.clubAlreadyExists}" + newClubUsername);
         }
 
-        Club clubEntity = clubMapper.toEntity(newClubDTO);
-        clubEntity.setPassword(passwordEncoder.encode(newClubDTO.getPassword()));
+
+        Club clubEntity = new Club();
+        clubMapper.fromDto(clubRequestDTO, clubEntity);
+
+        clubEntity.setPassword(passwordEncoder.encode(clubRequestDTO.getPassword()));
+
         Club savedClub = clubRepository.save(clubEntity);
 
-        return clubMapper.toClubDTO(savedClub);
+        return clubMapper.toDto(savedClub);
     }
 
     @Transactional(readOnly = true)
-    public ClubDetailsDTO getClubDetails(long id) {
+    public ClubResponseDTO getClubDetails(long id) {
         Long currentClubId = authService.getCurrentClubId();
 
         Club requestedClub = clubRepository.findById(id)
-                .orElseThrow( () -> new NotFoundException("Requested club not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("{errors.ServiceClubService.clubNotFound}"));
 
         if (!requestedClub.getIsPublic() && !currentClubId.equals(requestedClub.getId())) {
-            throw new InsufficientAuthoritiesException(HttpStatus.BAD_REQUEST, "You are not allowed to get details of this player");
+            throw new InsufficientAuthoritiesException(HttpStatus.BAD_REQUEST, "{errors.ServiceClubService.notAllowedToGetClubDetails}");
         }
 
-        ClubDetailsDTO clubDetailsDTO = clubMapper.toClubDetailsDTO(requestedClub);
+        ClubResponseDTO clubResponseDTO = clubMapper.toDto(requestedClub);
 
         long numberOfPlayers = playerRepository.countByClubId(id);
-        clubDetailsDTO.setNumberOfPlayers(numberOfPlayers);
+        clubResponseDTO.setNumberOfPlayers(numberOfPlayers);
 
-        return clubDetailsDTO;
+        return clubResponseDTO;
     }
 
     @Transactional(readOnly = true)
-    public Page<ClubDTO> getPublicClubs(Pageable pageable) {
+    public Page<ClubResponseDTO> getPublicClubs(Pageable pageable) {
         Page<Club> clubs = clubRepository.findAllByIsPublicTrue(pageable);
-        return clubs.map(clubMapper::toClubDTO);
+        return clubs.map(clubMapper::toDtoWithoutDetails);
     }
 
-    @Transactional(readOnly = true)
-    public Page<ClubDTO> getPublicClubsWithFederation(String federation, Pageable pageable) {
-        Page<Club> clubs = clubRepository.findAllByIsPublicTrueAndFederation(federation, pageable);
-        return clubs.map(clubMapper::toClubDTO);
-    }
-
-    public ClubDTO updateClub(ClubDTO clubDTO) {
+    @Transactional
+    public ClubResponseDTO updateClub(ClubRequestDTO clubDTO) {
         Long currentClubId = authService.getCurrentClubId();
 
         Club currentClub = clubRepository.findById(currentClubId)
-                .orElseThrow( () -> new NotFoundException("Club not found for provided token"));
+                .orElseThrow(() -> new ResourceNotFoundException("{errors.ServiceClubService.clubNotFoundForToken}"));
 
-        currentClub.setFederation(clubDTO.getFederation());
-        currentClub.setOfficialName(clubDTO.getOfficialName());
-        currentClub.setPopularName(clubDTO.getPopularName());
-        currentClub.setIsPublic(clubDTO.getIsPublic());
+        clubMapper.fromDto(clubDTO, currentClub);
 
         Club savedClub = clubRepository.save(currentClub);
 
-        return clubMapper.toClubDTO(savedClub);
+        return clubMapper.toDtoWithoutDetails(savedClub);
     }
 }

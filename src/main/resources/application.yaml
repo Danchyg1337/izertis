@@ -1,0 +1,28 @@
+spring:
+  application:
+    name: izertis
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/izertis
+    username: postgres
+    password: postgres
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+
+  security:
+    user:
+      name: admin
+
+  liquibase:
+    enabled: true
+    change-log: classpath:db/changelog/changelog-master.xml
+
+server:
+  port: 8080
+
+app:
+  jwt:
+    secret: mysecretsecretsecretsecretsecretkey

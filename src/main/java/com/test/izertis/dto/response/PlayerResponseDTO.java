@@ -1,11 +1,14 @@
-package com.test.izertis.dtos.response;
+package com.test.izertis.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import lombok.Data;
 
 import java.time.LocalDate;
 
 @Data
-public class PlayerDetailsDTO {
+@JsonInclude(Include.NON_NULL)
+public class PlayerResponseDTO {
     private long id;
 
     private String givenName;

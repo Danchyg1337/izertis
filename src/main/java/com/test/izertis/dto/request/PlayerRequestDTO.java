@@ -1,4 +1,5 @@
-package com.test.izertis.dtos.request;
+package com.test.izertis.dto.request;
+
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
@@ -7,7 +8,7 @@ import lombok.Data;
 import java.time.LocalDate;
 
 @Data
-public class NewPlayerDTO {
+public class PlayerRequestDTO {
     @NotNull
     private String givenName;
 

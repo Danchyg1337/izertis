@@ -1,0 +1,63 @@
+<databaseChangeLog
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.15.xsd">
+
+    <changeSet id="001-initial-database-creation" author="Denys">
+
+        <createTable tableName="club">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="username" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="password" type="VARCHAR(60)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="official_name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="popular_name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="federation" type="VARCHAR(8)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_public" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="player">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="given_name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="family_name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="nationality" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="email" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_of_birth" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="club_id" type="BIGINT"/>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="player"
+                baseColumnNames="club_id"
+                referencedTableName="club"
+                referencedColumnNames="id"
+                constraintName="fk_player_club"/>
+    </changeSet>
+
+</databaseChangeLog>

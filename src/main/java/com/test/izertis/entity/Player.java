@@ -1,4 +1,4 @@
-package com.test.izertis.model;
+package com.test.izertis.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -16,17 +16,22 @@ import java.time.LocalDate;
 public class Player {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Long id;
 
+    @Column(name = "given_name")
     private String givenName;
 
+    @Column(name = "family_name")
     private String familyName;
 
+    @Column(name = "nationality")
     private String nationality;
 
-    @Column(unique = true)
+    @Column(name = "email", unique = true)
     private String email;
 
+    @Column(name = "date_of_birth")
     private LocalDate dateOfBirth;
 
     @ManyToOne

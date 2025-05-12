@@ -1,4 +1,4 @@
-package com.test.izertis.dtos.response;
+package com.test.izertis.dto.response;
 
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
