@@ -24,21 +24,24 @@ public class PlayerController {
 
     @Operation(summary = "Register player")
     @PostMapping
-    private ResponseEntity<PlayerResponseDTO> registerPlayer(@Valid @RequestBody PlayerRequestDTO playerRequestDTO,
+    public ResponseEntity<PlayerResponseDTO> registerPlayer(@Valid @RequestBody PlayerRequestDTO playerRequestDTO,
                                                              @PathVariable long clubId) {
         return ResponseEntity.ok(playerService.registerPlayer(playerRequestDTO, clubId));
     }
 
     @Operation(summary = "Get all players of the club")
     @GetMapping
-    private ResponseEntity<Page<PlayerResponseDTO>> listPlayers(@PathVariable long clubId,
+    public ResponseEntity<Page<PlayerResponseDTO>> listPlayers(@PathVariable long clubId,
+                                                                @RequestParam(value = "givenName", required = false) String givenName,
+                                                                @RequestParam(value = "familyName", required = false) String familyName,
+                                                                //@RequestParam(value = "nationality", required = false) String federation,
                                                                 @Parameter(hidden = true) @PageableDefault(size = 5, sort = "id", direction = Direction.ASC) Pageable pageable) {
-        return ResponseEntity.ok(playerService.getAllPlayers(clubId, pageable));
+        return ResponseEntity.ok(playerService.getAllPlayers(clubId, givenName, familyName, pageable));
     }
 
     @Operation(summary = "Get player details")
     @GetMapping("/{playerId}")
-    private ResponseEntity<PlayerResponseDTO> listPlayers(@PathVariable long clubId,
+    public ResponseEntity<PlayerResponseDTO> listPlayers(@PathVariable long clubId,
                                                           @PathVariable long playerId) {
         return ResponseEntity.ok(playerService.getPlayerDetails(clubId, playerId));
     }

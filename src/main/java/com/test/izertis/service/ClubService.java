@@ -10,9 +10,11 @@ import com.test.izertis.mapper.ClubMapper;
 import com.test.izertis.repository.ClubRepository;
 import com.test.izertis.repository.PlayerRepository;
 import com.test.izertis.service.auth.AuthService;
+import com.test.izertis.specification.ClubSpecifications;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -66,8 +68,13 @@ public class ClubService {
     }
 
     @Transactional(readOnly = true)
-    public Page<ClubResponseDTO> getPublicClubs(Pageable pageable) {
-        Page<Club> clubs = clubRepository.findAllByIsPublicTrue(pageable);
+    public Page<ClubResponseDTO> getPublicClubs(Pageable pageable, String officialName, String popularName, String federation) {
+        Specification<Club> spec = Specification.where(ClubSpecifications.isPublic())
+                .and(ClubSpecifications.byOfficialName(officialName))
+                .and(ClubSpecifications.byPopularName(popularName))
+                .and(ClubSpecifications.byFederation(federation));
+
+        Page<Club> clubs = clubRepository.findAll(spec, pageable);
         return clubs.map(clubMapper::toDtoWithoutDetails);
     }
 

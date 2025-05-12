@@ -28,8 +28,11 @@ public class ClubController {
 
     @Operation(summary = "Get all public clubs")
     @GetMapping
-    public ResponseEntity<Page<ClubResponseDTO>> getPublicClubs(@Parameter(hidden = true) @PageableDefault(size = 5, sort = "id") Pageable pageable) {
-        return ResponseEntity.ok(clubService.getPublicClubs(pageable));
+    public ResponseEntity<Page<ClubResponseDTO>> getPublicClubs(@RequestParam(value = "officialName", required = false) String officialName,
+                                                                @RequestParam(value = "popularName", required = false) String popularName,
+                                                                @RequestParam(value = "federation", required = false) String federation,
+                                                                @Parameter(hidden = true) @PageableDefault(size = 5, sort = "id") Pageable pageable) {
+        return ResponseEntity.ok(clubService.getPublicClubs(pageable, officialName, popularName, federation));
     }
 
     @Operation(summary = "Get club details")
