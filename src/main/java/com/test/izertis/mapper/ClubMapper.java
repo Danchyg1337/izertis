@@ -9,6 +9,7 @@ import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
 public interface ClubMapper {
+    @Mapping(target = "id", ignore = true)
     void fromDto(ClubRequestDTO dto, @MappingTarget Club entity);
 
     ClubResponseDTO toDto(Club entity);

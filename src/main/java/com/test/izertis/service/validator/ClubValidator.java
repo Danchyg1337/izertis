@@ -16,7 +16,7 @@ public class ClubValidator {
         Long currentClubId = authService.getCurrentClubId();
 
         if (!club.getIsPublic() && !currentClubId.equals(club.getId())) {
-            throw new InsufficientAuthoritiesException(HttpStatus.BAD_REQUEST, "{errors.ServiceClubService.notAllowedToReadResource}");
+            throw new InsufficientAuthoritiesException(HttpStatus.FORBIDDEN, "{errors.ServiceClubService.notAllowedToReadResource}");
         }
     }
 
@@ -24,7 +24,7 @@ public class ClubValidator {
         Long currentClubId = authService.getCurrentClubId();
 
         if (!currentClubId.equals(clubId)) {
-            throw new InsufficientAuthoritiesException(HttpStatus.BAD_REQUEST, "{errors.ServiceClubService.notAllowedToWriteToResource}");
+            throw new InsufficientAuthoritiesException(HttpStatus.FORBIDDEN, "{errors.ServiceClubService.notAllowedToWriteToResource}");
         }
     }
 }

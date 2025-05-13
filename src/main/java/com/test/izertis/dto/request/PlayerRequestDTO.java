@@ -1,6 +1,7 @@
 package com.test.izertis.dto.request;
 
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
 import lombok.Data;
@@ -9,19 +10,20 @@ import java.time.LocalDate;
 
 @Data
 public class PlayerRequestDTO {
-    @NotNull
+    @NotBlank
     private String givenName;
 
-    @NotNull
+    @NotBlank
     private String familyName;
 
-    @NotNull
+    @NotBlank
     private String nationality;
 
-    @NotNull
+    @NotBlank
     @Email
     private String email;
 
+    @NotNull
     @Past
     private LocalDate dateOfBirth;
 }

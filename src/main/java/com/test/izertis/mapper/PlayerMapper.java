@@ -9,11 +9,10 @@ import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
 public interface PlayerMapper {
-
+    @Mapping(target = "id", ignore = true)
     void fromDto(PlayerRequestDTO dto, @MappingTarget Player entity);
 
     PlayerResponseDTO toDto(Player entity);
-
 
     @Mapping(target = "email", ignore = true)
     @Mapping(target = "nationality", ignore = true)

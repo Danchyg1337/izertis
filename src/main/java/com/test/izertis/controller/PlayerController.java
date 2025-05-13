@@ -15,6 +15,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
+
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/club/{clubId}/player")
@@ -26,7 +28,8 @@ public class PlayerController {
     @PostMapping
     public ResponseEntity<PlayerResponseDTO> registerPlayer(@Valid @RequestBody PlayerRequestDTO playerRequestDTO,
                                                             @PathVariable long clubId) {
-        return ResponseEntity.ok(playerService.registerPlayer(playerRequestDTO, clubId));
+        PlayerResponseDTO registeredPlayer = playerService.registerPlayer(playerRequestDTO, clubId);
+        return ResponseEntity.created(URI.create(String.format("/club/%d/player/%d", clubId, registeredPlayer.getId()))).body(registeredPlayer);
     }
 
     @Operation(summary = "Get all players of the club")

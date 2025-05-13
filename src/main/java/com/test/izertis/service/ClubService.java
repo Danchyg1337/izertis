@@ -34,7 +34,7 @@ public class ClubService {
         String newClubUsername = clubRequestDTO.getUsername();
 
         if (clubRepository.findByUsername(newClubUsername).isPresent()) {
-            throw new ConflictException("{errors.ServiceClubService.clubAlreadyExists}" + newClubUsername);
+            throw new ConflictException(String.format("{errors.ServiceClubService.clubAlreadyExists#%s}", newClubUsername));
         }
 
         Club clubEntity = new Club();

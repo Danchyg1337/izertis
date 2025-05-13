@@ -9,6 +9,7 @@ import com.test.izertis.mapper.PlayerMapper;
 import com.test.izertis.repository.ClubRepository;
 import com.test.izertis.repository.PlayerRepository;
 import com.test.izertis.service.validator.ClubValidator;
+import com.test.izertis.service.validator.PlayerValidator;
 import com.test.izertis.specification.PlayerSpecifications;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -24,6 +25,7 @@ public class PlayerService {
     private final PlayerRepository playerRepository;
     private final ClubRepository clubRepository;
     private final ClubValidator clubValidator;
+    private final PlayerValidator playerValidator;
 
     @Transactional
     public PlayerResponseDTO registerPlayer(PlayerRequestDTO playerRequestDTO, long clubId) {
@@ -39,7 +41,7 @@ public class PlayerService {
 
         Player savedPlayer = playerRepository.save(newPlayer);
 
-        return playerMapper.toDtoWithoutDetails(savedPlayer);
+        return playerMapper.toDto(savedPlayer);
     }
 
     @Transactional(readOnly = true)
@@ -69,6 +71,7 @@ public class PlayerService {
                 .orElseThrow(() -> new ResourceNotFoundException("{errors.ServiceClubService.clubNotFound}"));
 
         clubValidator.validateThatUserHasReadAccessToClub(requestedClub);
+        playerValidator.validatePlayerBelongsToClub(clubId, playerId);
 
         Player requestedPlayer = playerRepository.findById(playerId)
                 .orElseThrow(() -> new ResourceNotFoundException("{errors.ServicePlayerService.playerNotFound}"));
@@ -79,6 +82,7 @@ public class PlayerService {
     @Transactional
     public PlayerResponseDTO updatePlayer(PlayerRequestDTO playerDTO, long clubId, long playerId) {
         clubValidator.validateThatUserHasWriteAccessToClub(clubId);
+        playerValidator.validatePlayerBelongsToClub(clubId, playerId);
 
         Player requestedPlayer = playerRepository.findById(playerId)
                 .orElseThrow(() -> new ResourceNotFoundException("{errors.ServicePlayerService.playerNotFound}"));
@@ -97,6 +101,7 @@ public class PlayerService {
     @Transactional
     public void deletePlayer(long clubId, long playerId) {
         clubValidator.validateThatUserHasWriteAccessToClub(clubId);
+        playerValidator.validatePlayerBelongsToClub(clubId, playerId);
         playerRepository.deleteById(playerId);
     }
 }

@@ -3,6 +3,7 @@ package com.test.izertis.service.auth;
 import com.test.izertis.config.JwtProvider;
 import com.test.izertis.dto.response.JwtTokenDTO;
 import com.test.izertis.entity.Club;
+import com.test.izertis.exception.InvalidCredentialsException;
 import com.test.izertis.repository.ClubRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -19,10 +20,10 @@ public class AuthService {
 
     public JwtTokenDTO login(String username, String password) {
         Club club = clubRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("{errors.ServiceAuthService.invalidCredentials}"));
+                .orElseThrow(() -> new InvalidCredentialsException("{errors.ServiceAuthService.invalidCredentials}"));
 
         if (!passwordEncoder.matches(password, club.getPassword())) {
-            throw new RuntimeException("{errors.ServiceAuthService.invalidCredentials}");
+            throw new InvalidCredentialsException("{errors.ServiceAuthService.invalidCredentials}");
         }
 
         String token = jwtProvider.generateToken(club.getId());

@@ -1,8 +1,10 @@
 package com.test.izertis.service.security;
 
 import com.test.izertis.entity.Club;
+import com.test.izertis.exception.InvalidCredentialsException;
 import com.test.izertis.repository.ClubRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -17,9 +19,9 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Club user = clubRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("{errors.ServiceAuthService.invalidCredentials}"));
+                .orElseThrow(() -> new InvalidCredentialsException("{errors.ServiceAuthService.invalidCredentials}"));
 
-        return org.springframework.security.core.userdetails.User.builder()
+        return User.builder()
                 .username(user.getUsername())
                 .password(user.getPassword())
                 .roles("CLUB_OWNER")

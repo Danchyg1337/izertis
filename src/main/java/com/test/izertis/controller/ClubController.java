@@ -13,6 +13,8 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
+
 @RestController
 @RequestMapping("/club")
 @RequiredArgsConstructor
@@ -23,7 +25,8 @@ public class ClubController {
     @Operation(summary = "Register a new club")
     @PostMapping
     public ResponseEntity<ClubResponseDTO> register(@Valid @RequestBody ClubRequestDTO clubRequestDTO) {
-        return ResponseEntity.ok(clubService.registerClub(clubRequestDTO));
+        ClubResponseDTO registeredClub = clubService.registerClub(clubRequestDTO);
+        return ResponseEntity.created(URI.create("/club/" + registeredClub.getId())).body(registeredClub);
     }
 
     @Operation(summary = "Get all public clubs")
